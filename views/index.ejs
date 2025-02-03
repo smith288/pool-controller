@@ -65,7 +65,7 @@
                   class="toggle-input"
                   data-type="<%= key %>"
                   <%= (value === 'On' || (typeof window !== 'undefined' && window.initialStates && window.initialStates[key])) ? 'checked' : '' %>
-                  <%= (switchStatuses['filter'] === 'Off') ? 'disabled' : '' %>
+                  <%= (switchStatuses['filter'] === false) ? 'disabled' : '' %>
                 >
                 <span class="slider round"></span>
               </label>

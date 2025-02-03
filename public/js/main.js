@@ -287,7 +287,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function handleDirectionPress(direction) {
     console.log('Direction pressed:', direction);
+    
+    // Add visual feedback
+    const button = document.querySelector(`.d-pad-button.${direction}`);
+    if (button) {
+      button.classList.add('pressed');
+      
+      // Remove pressed class after animation
+      setTimeout(() => {
+        button.classList.remove('pressed');
+      }, 200);
+    }
+    
     // Emit the direction press to the server
     socket.emit('directionPress', { direction });
   }
+
+  // Add this to your existing socket listeners
+  socket.on('buttonResponse', (response) => {
+    const button = document.querySelector(`.d-pad-button.${response.direction}`);
+    if (button) {
+      if (!response.success) {
+        // Visual feedback for error
+        button.classList.add('error');
+        setTimeout(() => {
+          button.classList.remove('error');
+        }, 500);
+        
+        console.error('Button press failed:', response.error);
+      }
+    }
+  });
 });

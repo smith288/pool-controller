@@ -64,24 +64,31 @@ function socketHandler(io, serialHandler) {
 
       socket.on('directionPress', (data) => {
         console.log('Direction pressed:', data.direction);
-        // Handle the direction press here
-        // You can add specific logic for each direction
-        switch(data.direction) {
-          case 'up':
-            // Handle up press
-            break;
-          case 'down':
-            // Handle down press
-            break;
-          case 'left':
-            // Handle left press
-            break;
-          case 'right':
-            // Handle right press
-            break;
-          case 'menu':
-            // Handle menu press
-            break;
+        
+        // Map directions to commands
+        let command = data.direction;
+        if (command) {
+          try {
+            // If one of the menu buttons (left, right, up, down) are pressed, there is no target state
+            if (command === 'left' || command === 'right' || command === 'up' || command === 'down') {
+              // Send the button command - false means no confirmation needed
+              serialHandler.sendCommand(command, null, false);              
+            } else {
+              // Send the button command - false means no confirmation needed
+              serialHandler.sendCommand(command, true, false);
+            }
+            socket.emit('buttonResponse', {
+              direction: data.direction,
+              success: true
+            });
+          } catch (error) {
+            console.error('Error sending button command:', error);
+            socket.emit('buttonResponse', {
+              direction: data.direction,
+              success: false,
+              error: error.message
+            });
+          }
         }
       });
 

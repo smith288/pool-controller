@@ -8,8 +8,17 @@ const createServer = require('./server/index');
 const DEVICE_IP = process.env.DEVICE_IP || '10.155.1.21';
 const DEVICE_PORT = process.env.DEVICE_PORT || '8899';
 
+// Add to your configuration section
+const mqtt_host = process.env.MQTT_HOST || 'homebridge';
+const mqtt_port = process.env.MQTT_PORT || 1883;
+
 // Instantiate the SerialHandler
-const serialHandler = new SerialHandler(DEVICE_IP, DEVICE_PORT);
+const serialHandler = new SerialHandler(
+    DEVICE_IP, 
+    DEVICE_PORT, 
+    mqtt_host,
+    mqtt_port
+);
 
 // Create and start the sockets and web server
 const server = createServer(serialHandler);
@@ -169,3 +178,10 @@ serialHandler.on('ledStatus', (statuses) => {
 commandListener();
 
 // Handle other events as needed
+
+// Add cleanup handling
+process.on('SIGINT', () => {
+    console.log('Shutting down...');
+    serialHandler.close();
+    process.exit();
+});

@@ -14,6 +14,8 @@
     "ejs": "^3.1.10",
     "express": "^4.21.0",
     "express-session": "^1.18.0",
+    "mqtt": "^5.10.3",
+    "session": "^0.1.0",
     "socket.io": "^4.8.0"
   }
 }
