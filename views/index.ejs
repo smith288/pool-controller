@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pool Controller</title>
+  <!-- Include CSS -->
+  <link rel="stylesheet" href="/css/style.css">
+  <script>
+    // Add this before the main script
+    window.initialStates = JSON.parse(localStorage.getItem('poolControllerStates') || '{}');
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h1>Pool Controller</h1>
+
+    <div class="display-panel">
+      <h2>Pool Controller Display</h2>
+      <div id="led-display" class="led-display">
+        <%= typeof currentLEDDisplay === 'object' && currentLEDDisplay.display ? currentLEDDisplay.display : 'Initializing...' %>
+      </div>
+    </div>
+    
+    <div class="control-pad">
+      <div class="d-pad">
+        <button class="d-pad-button up" data-direction="up" aria-label="Up">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 4l-8 8h6v8h4v-8h6z"/>
+          </svg>
+        </button>
+        <button class="d-pad-button left" data-direction="left" aria-label="Left">
+          <svg viewBox="0 0 24 24">
+            <path d="M4 12l8-8v6h8v4h-8v6z"/>
+          </svg>
+        </button>
+        <button class="d-pad-button menu" data-direction="menu" aria-label="Menu">
+          <svg viewBox="0 0 24 24">
+            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+          </svg>
+        </button>
+        <button class="d-pad-button right" data-direction="right" aria-label="Right">
+          <svg viewBox="0 0 24 24">
+            <path d="M20 12l-8-8v6H4v4h8v6z"/>
+          </svg>
+        </button>
+        <button class="d-pad-button down" data-direction="down" aria-label="Down">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 20l8-8h-6V4h-4v8H4z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    
+    <div class="controls-grid">
+      <% if (typeof switchStatuses === 'object' && switchStatuses) { %>
+        <% for (const [key, value] of Object.entries(switchStatuses)) { %>
+          <div class="control-item">
+            <% if (key === 'spa_pool') { %>
+              <h3>Mode</h3>
+              <label class="switch">
+                <input 
+                  type="checkbox" 
+                  id="toggle-<%= key %>" 
+                  class="toggle-input"
+                  data-type="<%= key %>"
+                  <%= (value === 'On' || (typeof window !== 'undefined' && window.initialStates && window.initialStates[key])) ? 'checked' : '' %>
+                  <%= (switchStatuses['filter'] === 'Off') ? 'disabled' : '' %>
+                >
+                <span class="slider round"></span>
+              </label>
+              <div class="status-label">
+                <%= value === 'On' ? 'Spa' : 'Pool' %>
+              </div>
+            <% } else { %>
+              <h3><%= key.charAt(0).toUpperCase() + key.slice(1) %></h3>
+              <label class="switch">
+                <input 
+                  type="checkbox" 
+                  id="toggle-<%= key %>" 
+                  class="toggle-input"
+                  data-type="<%= key %>"
+                  <%= (value === 'On' || (typeof window !== 'undefined' && window.initialStates && window.initialStates[key])) ? 'checked' : '' %>
+                >
+                <span class="slider round"></span>
+              </label>
+              <div class="status-label">
+                <%= value %>
+              </div>
+            <% } %>
+          </div>
+        <% } %>
+      <% } else { %>
+        <div>No switch statuses available</div>
+      <% } %>
+    </div>
+  </div>
+  <!-- Include client-side JavaScript -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/main.js"></script>
+</body>
+</html>
