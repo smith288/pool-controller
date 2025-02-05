@@ -4,49 +4,56 @@ const express = require('express');
 const path = require('path');
 const http = require('http');
 const socketIo = require('socket.io');
-const routes = require('./routes');
+const createRouter = require('./routes');
 const socketHandler = require('./socketHandler');
+const session = require('express-session');
 
 function createServer(serialHandler) {
-  // Create Express app
   const app = express();
-
-  var publicPath = path.join(__dirname, '..', 'public');
-  var viewPath = path.join(__dirname, '..', 'views');
-
-  console.log(`Public path: ${publicPath}`);
-  console.log(`View path: ${viewPath}`);
-
-  // Set EJS as templating engine
-  app.set('view engine', 'ejs');
-  app.set('views', viewPath);
-
-  // Serve static assets
-  app.use(express.static(publicPath));
-
-  // Parse JSON bodies
-  app.use(express.json());
-
-  // Make session available in EJS templates
-  app.use((req, res, next) => {
-    res.locals.session = req.session;
-    next();
-  });
-
-  // Use routes
-  app.use('/', routes(serialHandler));
-
-  // Create HTTP server
   const server = http.createServer(app);
-
-  // Initialize Socket.IO
   const io = socketIo(server);
+
+  // Set up view engine
+  app.set('view engine', 'ejs');
+  app.set('views', path.join(__dirname, '../views'));
+
+  // Middleware
+  app.use(express.static(path.join(__dirname, '../public')));
+  app.use(express.json());
+  app.use(session({
+    secret: 'pool-controller-secret',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false }
+  }));
+
+  // Routes
+  app.use('/', createRouter(serialHandler));
+
+  // Socket.io handling
+  // io.on('connection', (socket) => {
+  //   try {
+  //     console.log('Client connected');
+      
+  //   socket.on('toggleSwitch', (data) => {
+  //     serialHandler.toggleSwitch(data);
+  //   });
+
+  //   socket.on('directionPress', (data) => {
+  //     serialHandler.sendCommand(data.direction);
+  //   });
+
+  //   socket.on('disconnect', () => {
+  //     console.log('Client disconnected');
+  //   });
+  //   } catch (error) {
+  //     console.error('Error in socket connection:', error);
+  //   }
+  // });
 
   // Set up Socket.IO handlers
   socketHandler(io, serialHandler);
-
   return server;
 }
-
 
 module.exports = createServer;

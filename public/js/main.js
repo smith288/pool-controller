@@ -131,7 +131,13 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   socket.on('connect', () => {
-    console.log('Connected to server');
+    console.log('Connected to server, requesting initial state');
+    socket.emit('requestInitialState');
+  });
+
+  socket.on('reconnect', () => {
+    console.log('Reconnected to server, requesting current state');
+    socket.emit('requestInitialState');
   });
 
   socket.on('displayUpdate', (displayText) => {
@@ -151,42 +157,41 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Update the statusUpdate handler to save states
+  // Update the statusUpdate handler
   socket.on('statusUpdate', (statuses) => {
-    const savedStates = {};
+    console.log('Received status update:', statuses);
+    
+    // Update all control items based on the received statuses
     Object.entries(statuses).forEach(([key, value]) => {
-      savedStates[key] = value;
-      const toggle = document.querySelector(`input[data-type="${key}"]`);
-      if (toggle) {
-        toggle.checked = value;
-        toggle.disabled = false;
+      const controlItem = document.querySelector(`.control-item[data-type="${key}"]`);
+      if (controlItem) {
+        // Update active state
+        controlItem.classList.toggle('active', value === true);
         
-        // Update status label
-        const statusLabel = toggle.closest('.control-item').querySelector('.status-label');
-        if (statusLabel) {
-          if (key === 'spa_pool') {
-            statusLabel.textContent = value ? 'Spa' : 'Pool';
-          } else {
-            statusLabel.textContent = value ? 'On' : 'Off';
-          }
+        // Update the hidden checkbox if it exists
+        const checkbox = controlItem.querySelector('.toggle-input');
+        if (checkbox) {
+          checkbox.checked = value;
         }
-        
-        // If this is the filter toggle, update spa_pool toggle state
-        if (key === 'filter') {
-          const spaPoolToggle = document.querySelector('input[data-type="spa_pool"]');
-          if (spaPoolToggle) {
-            spaPoolToggle.disabled = !value;
+
+        // Update mode text if this is the spa toggle
+        if (key === 'spa') {
+          const spaText = document.querySelector('.spa-text');
+          const poolText = document.querySelector('.pool-text');
+          if (spaText && poolText) {
+            spaText.classList.toggle('active-text', value === true);
+            poolText.classList.toggle('active-text', value === false);
           }
-        }
-        
-        // Clear pending state if this was a pending switch
-        if (pendingSwitches.has(key)) {
-          pendingSwitches.delete(key);
-          modal.style.display = 'none';
         }
       }
     });
-    saveStates(savedStates);
+
+    // Handle filter-dependent disabled states
+    const filterEnabled = statuses.filter === true;
+    const modeControl = document.querySelector('.control-item[data-type="spa"]');
+    if (modeControl) {
+      modeControl.classList.toggle('disabled', !filterEnabled);
+    }
   });
 
   // Control pad handling
@@ -318,4 +323,71 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   });
+
+  // Update the toggleHandler function
+  function toggleHandler(event) {
+    const toggle = event.target;
+    const switchType = toggle.dataset.type;
+    const newStatus = toggle.checked ? 'On' : 'Off';
+
+    // If this is the mode toggle, handle spa/pool differently
+    if (switchType === 'spa' || switchType === 'pool') {
+      socket.emit('toggleSwitch', {
+        switchType: 'spa',
+        newStatus: toggle.checked ? 'On' : 'Off'
+      });
+      socket.emit('toggleSwitch', {
+        switchType: 'pool',
+        newStatus: toggle.checked ? 'Off' : 'On'
+      });
+    } else {
+      socket.emit('toggleSwitch', {
+        switchType,
+        newStatus
+      });
+    }
+  }
+
+  // Handle the mode switch
+  const modeSwitch = document.querySelector('.switch-handle');
+  if (modeSwitch) {
+    modeSwitch.addEventListener('click', function() {
+      if (this.hasAttribute('disabled')) return;
+
+      const isSpa = this.classList.contains('spa');
+      this.classList.toggle('spa');
+      this.classList.toggle('pool');
+      
+      // Update labels
+      const spaLabel = document.querySelector('.mode-label.spa');
+      const poolLabel = document.querySelector('.mode-label.pool');
+      spaLabel.classList.toggle('active');
+      poolLabel.classList.toggle('active');
+
+      // Update ARIA state
+      this.setAttribute('aria-checked', !isSpa);
+
+      // Emit the appropriate events
+      socket.emit('toggleSwitch', {
+        switchType: 'spa',
+        newStatus: !isSpa ? 'On' : 'Off'
+      });
+      socket.emit('toggleSwitch', {
+        switchType: 'pool',
+        newStatus: !isSpa ? 'Off' : 'On'
+      });
+    });
+  }
+
+  // Add to your DOMContentLoaded event handler
+  const themeToggle = document.getElementById('theme-toggle');
+  if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+    });
+  }
 });

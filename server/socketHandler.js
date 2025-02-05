@@ -24,41 +24,27 @@ function socketHandler(io, serialHandler) {
           return;
         }
 
-        // Add command tracking
-        const commandTimeout = setTimeout(() => {
-          socket.emit('switchResponse', {
-            type: switchObject.switchType,
-            success: false,
-            error: 'Command timed out'
-          });
-        }, 30000); // 30 second timeout
-
-        // Listen for the status change
-        const statusHandler = (statuses) => {
-          if (statuses[switchObject.switchType] === targetState) {
-            clearTimeout(commandTimeout);
+        try {
+          const success = serialHandler.toggleSwitch(switchObject);
+          if (success) {
             socket.emit('switchResponse', {
               type: switchObject.switchType,
               success: true,
               status: switchObject.newStatus
             });
-            serialHandler.removeListener('statusUpdate', statusHandler);
+          } else {
+            socket.emit('switchResponse', {
+              type: switchObject.switchType,
+              success: false,
+              error: 'Failed to toggle switch'
+            });
           }
-        };
-
-        serialHandler.on('statusUpdate', statusHandler);
-        
-        // Send the command
-        try {
-          serialHandler.sendCommand(switchObject.switchType, targetState, true);
         } catch (error) {
-          clearTimeout(commandTimeout);
           socket.emit('switchResponse', {
             type: switchObject.switchType,
             success: false,
             error: error.message
           });
-          serialHandler.removeListener('statusUpdate', statusHandler);
         }
       });
 

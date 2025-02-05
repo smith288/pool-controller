@@ -3,10 +3,13 @@
 require('dotenv').config();
 const SerialHandler = require('./lib/serialHandler');
 const createServer = require('./server/index');
+const express = require('express');
+const session = require('express-session');
+const path = require('path');
 
 // Replace with your actual device IP and port
-const DEVICE_IP = process.env.DEVICE_IP || '10.155.1.21';
-const DEVICE_PORT = process.env.DEVICE_PORT || '8899';
+const DEVICE_IP = process.env.RS485_DEVICE_IP || '10.155.1.19';
+const DEVICE_PORT = process.env.RS485_DEVICE_PORT || '8899';
 
 // Add to your configuration section
 const mqtt_host = process.env.MQTT_HOST || 'homebridge';
@@ -22,7 +25,7 @@ const serialHandler = new SerialHandler(
 
 // Create and start the sockets and web server
 const server = createServer(serialHandler);
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.POOL_CONTROLLER_PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
@@ -185,3 +188,21 @@ process.on('SIGINT', () => {
     serialHandler.close();
     process.exit();
 });
+
+// Add or update the static file middleware
+const app = express();
+app.use(express.static('public'));
+
+// Add this to your static file serving configuration
+app.use('/fonts', express.static(path.join(__dirname, '../public/fonts'))); 
+
+// Add session middleware before your routes
+app.use(session({
+  secret: 'pool-controller-secret',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false } // set to true if using HTTPS
+}));
+
+// Add body parser for JSON
+app.use(express.json());

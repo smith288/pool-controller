@@ -4,7 +4,8 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "concurrently \"node app.js\""
   },
   "keywords": [],
   "author": "",
@@ -17,5 +18,10 @@
     "mqtt": "^5.10.3",
     "session": "^0.1.0",
     "socket.io": "^4.8.0"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.17",
+    "concurrently": "^9.1.2",
+    "postcss": "^8.4.35"
   }
 }

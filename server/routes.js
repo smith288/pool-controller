@@ -7,8 +7,14 @@ const viewController = require('./controllers/viewController');
 function createRouter(serialHandler) {
   const router = express.Router();
 
-  // Pass serialHandler to controllers
-  router.get('/', viewController.index(serialHandler));
+  // Update viewController to include serialHandler data
+  router.use((req, res, next) => {
+    req.serialHandler = serialHandler;
+    next();
+  });
+
+  // Use the viewController router
+  router.use('/', viewController);
 
   // API routes
   router.get('/api/status', apiController.getStatus(serialHandler));
