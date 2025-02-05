@@ -57,7 +57,8 @@ router.get('/', (req, res) => {
 
   res.render('index', { 
     switchStatuses,
-    currentLEDDisplay: serialHandler?.commandHandler?.currentLEDDisplay || { display: '' }
+    currentLEDDisplay: serialHandler?.commandHandler?.currentLEDDisplay || { display: '' },
+    poolName: poolConfig.poolName
   });
 });
 

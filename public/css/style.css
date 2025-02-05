@@ -4,6 +4,9 @@ body {
   margin: 0;
   padding: 20px;
   color: #333;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 @font-face {
@@ -42,6 +45,8 @@ body {
   border-radius: 10px;
   padding: 20px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  flex: 1;
+  margin-bottom: 0;  /* Remove bottom margin since footer handles spacing */
 }
 h1 {
   text-align: center;
@@ -1022,4 +1027,14 @@ body {
     transform 0.15s ease,
     box-shadow 0.15s ease,
     background-color 0.2s ease;
+}
+
+/* Add footer styles */
+.footer {
+  text-align: center;
+  padding: 20px;
+  margin-top: 40px;
+  color: var(--text-color);
+  font-size: 14px;
+  opacity: 0.8;
 }
