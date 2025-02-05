@@ -2,7 +2,9 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  const socket = io();
+  const socket = io({
+    path: `${window.location.pathname.split('/')[1]}/socket.io`
+  });
   const STORAGE_KEY = 'poolControllerStates';
   
   // Create modal element

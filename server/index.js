@@ -7,6 +7,7 @@ const socketIo = require('socket.io');
 const createRouter = require('./routes');
 const socketHandler = require('./socketHandler');
 const session = require('express-session');
+const poolConfig = require('../config/poolConfig');
 
 function createServer(serialHandler) {
   const app = express();
@@ -16,9 +17,15 @@ function createServer(serialHandler) {
   // Set up view engine
   app.set('view engine', 'ejs');
   app.set('views', path.join(__dirname, '../views'));
+  
+  // Add base path to locals so it's available in all views
+  app.locals.basePath = poolConfig.basePath;
 
-  // Middleware
-  app.use(express.static(path.join(__dirname, '../public')));
+  // Serve static files under the base path
+  app.use(poolConfig.basePath, express.static(path.join(__dirname, '../public')));
+  app.use(`${poolConfig.basePath}/fonts`, express.static(path.join(__dirname, '../public/fonts')));
+  
+  // Then add other middleware
   app.use(express.json());
   app.use(session({
     secret: 'pool-controller-secret',
@@ -27,32 +34,31 @@ function createServer(serialHandler) {
     cookie: { secure: false }
   }));
 
-  // Routes
-  app.use('/', createRouter(serialHandler));
+  // Add authentication check after static files
+  app.use((req, res, next) => {
+    // Skip auth check for static files and login
+    if (req.path.startsWith('/css/') || 
+        req.path.startsWith('/js/') || 
+        req.path.startsWith('/fonts/') ||
+        req.path.startsWith('/socket.io/') ||
+        req.path === '/login') {
+      return next();
+    }
 
-  // Socket.io handling
-  // io.on('connection', (socket) => {
-  //   try {
-  //     console.log('Client connected');
-      
-  //   socket.on('toggleSwitch', (data) => {
-  //     serialHandler.toggleSwitch(data);
-  //   });
+    if (req.session && req.session.authenticated) {
+      next();
+    } else {
+      res.redirect('/login');
+    }
+  });
 
-  //   socket.on('directionPress', (data) => {
-  //     serialHandler.sendCommand(data.direction);
-  //   });
+  // Mount all routes under the base path
+  app.use(poolConfig.basePath, createRouter(serialHandler));
 
-  //   socket.on('disconnect', () => {
-  //     console.log('Client disconnected');
-  //   });
-  //   } catch (error) {
-  //     console.error('Error in socket connection:', error);
-  //   }
-  // });
-
-  // Set up Socket.IO handlers
+  // Set up Socket.IO with the base path
+  io.path(`${poolConfig.basePath}/socket.io`);
   socketHandler(io, serialHandler);
+  
   return server;
 }
 
