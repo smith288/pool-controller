@@ -4,10 +4,9 @@ After=network.target
 
 [Service]
 Restart=always
-ExecStart=node /home/ubuntu/pool-controller/app.js 10.155.1.19 8899
+ExecStart=/home/ubuntu/pool-controller/start.sh
 WorkingDirectory=/home/ubuntu/pool-controller
 User=ubuntu
-Environment=RS485_DEVICE_IP=10.155.1.19,RS485_DEVICE_PORT=8899,MQTT_HOST=homebridge,MQTT_PORT=1883,POOL_CONTROLLER_PORT=5000
 
 [Install]
 WantedBy=multi-user.target
