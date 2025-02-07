@@ -6,6 +6,7 @@ function socketHandler(io, serialHandler) {
   
       // Send initial status
       socket.emit('statusUpdate', serialHandler.currentStatuses);
+      socket.emit('temperatureUpdate', serialHandler.currentTemperatures);
   
       socket.on('toggleSwitch', (switchObject) => {
         console.log('Switch toggle request received:', switchObject);
@@ -78,6 +79,35 @@ function socketHandler(io, serialHandler) {
         }
       });
 
+      socket.on('setTemperature', async (data) => {
+        console.log('Temperature setting request received:', data);
+        
+        try {
+          if (data.spatemp !== undefined) {
+            await serialHandler.setTemperature('spa', data.spatemp);
+            socket.emit('temperatureResponse', {
+              type: 'spa',
+              success: true,
+              temperature: data.spatemp
+            });
+          } else if (data.pooltemp !== undefined) {
+            await serialHandler.setTemperature('pool', data.pooltemp);
+            socket.emit('temperatureResponse', {
+              type: 'pool',
+              success: true,
+              temperature: data.pooltemp
+            });
+          }
+        } catch (error) {
+          console.error('Error setting temperature:', error);
+          socket.emit('temperatureResponse', {
+            type: data.spatemp !== undefined ? 'spa' : 'pool',
+            success: false,
+            error: error.message
+          });
+        }
+      });
+
       socket.on('disconnect', () => {
         console.log('Client disconnected');
       });
@@ -89,6 +119,11 @@ function socketHandler(io, serialHandler) {
     
     serialHandler.on('displayUpdate', (statuses) => {
       io.emit('displayUpdate', statuses);
+    });
+
+    // Add temperature update event handler
+    serialHandler.on('temperatureUpdate', (temperatures) => {
+      io.emit('temperatureUpdate', temperatures);
     });
 }
 

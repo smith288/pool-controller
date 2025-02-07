@@ -45,7 +45,7 @@ function createServer(serialHandler) {
       return next();
     }
 
-    if (req.session && req.session.authenticated) {
+    if ((req.session && req.session.authenticated) || !poolConfig.usePin) {
       next();
     } else {
       res.redirect('/login');

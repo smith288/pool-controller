@@ -392,4 +392,43 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('theme', newTheme);
     });
   }
+
+  // Temperature Control Handlers
+  const tempSliders = document.querySelectorAll('.temp-slider');
+  const setTempButtons = document.querySelectorAll('.set-temp-btn');
+  
+  tempSliders.forEach(slider => {
+    const display = slider.closest('.temp-control').querySelector('.current-temp');
+    
+    slider.addEventListener('input', (e) => {
+      display.textContent = e.target.value;
+    });
+  });
+  
+  setTempButtons.forEach(button => {
+    button.addEventListener('click', (e) => {
+      const type = button.dataset.type;
+      const slider = document.querySelector(`#${type}-temp-slider`);
+      const temperature = parseInt(slider.value, 10);
+      
+      // Emit temperature setting command
+      if (type === 'spa') {
+        socket.emit('setTemperature', { spatemp: temperature });
+      } else {
+        socket.emit('setTemperature', { pooltemp: temperature });
+      }
+    });
+  });
+
+  // Add temperature update handler
+  socket.on('temperatureUpdate', (temperatures) => {
+    Object.entries(temperatures).forEach(([type, temp]) => {
+      const display = document.querySelector(`.${type}-temp .current-temp`);
+      const slider = document.querySelector(`#${type}-temp-slider`);
+      if (display && slider) {
+        display.textContent = temp;
+        slider.value = temp;
+      }
+    });
+  });
 });

@@ -46,6 +46,51 @@
       </div>
     </div>
     
+    <!-- Add Temperature Controls -->
+    <div class="temperature-controls">
+      <div class="temp-control spa-temp">
+        <h3>Spa Temperature</h3>
+        <div class="temp-display">
+          <span class="current-temp"><%= currentTemperatures?.spa || '--' %></span>°F
+        </div>
+        <div class="temp-slider-container">
+          <input type="range" class="temp-slider" id="spa-temp-slider" 
+                 min="50" max="104" value="<%= currentTemperatures?.spa || 80 %>"
+                 data-type="spa">
+          <button class="set-temp-btn" data-type="spa">Set</button>
+        </div>
+      </div>
+      
+      <div class="temp-control pool-temp">
+        <h3>Pool Temperature</h3>
+        <div class="temp-display">
+          <span class="current-temp"><%= currentTemperatures?.pool || '--' %></span>°F
+        </div>
+        <div class="temp-slider-container">
+          <input type="range" class="temp-slider" id="pool-temp-slider" 
+                 min="50" max="104" value="<%= currentTemperatures?.pool || 80 %>"
+                 data-type="pool">
+          <button class="set-temp-btn" data-type="pool">Set</button>
+        </div>
+      </div>
+
+      <div class="sensor-temps">
+        <div class="sensor-temp water-temp">
+          <h3>Water Temperature</h3>
+          <div class="temp-display">
+            <span class="current-temp"><%= currentTemperatures?.water || '--' %></span>°F
+          </div>
+        </div>
+        
+        <div class="sensor-temp air-temp">
+          <h3>Air Temperature</h3>
+          <div class="temp-display">
+            <span class="current-temp"><%= currentTemperatures?.air || '--' %></span>°F
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="control-pad">
       <div class="d-pad">
         <button class="d-pad-button up" data-direction="up" aria-label="Up">
