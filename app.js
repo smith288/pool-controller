@@ -172,7 +172,7 @@ serialHandler.on('ledStatus', (statuses) => {
         // Display what changed
         Object.keys(statuses).forEach((key) => {
             if (previousStatuses == null || (statuses[key] !== previousStatuses[key])) {
-                console.log(`LED "${key}" set to:`, statuses[key]);
+                //console.log(`LED "${key}" set to:`, statuses[key]);
             }
         });
     }
