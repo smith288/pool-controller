@@ -48,7 +48,8 @@ router.get('/', (req, res) => {
     switchStatuses,
     currentLEDDisplay: serialHandler?.commandHandler?.currentLEDDisplay || { display: '' },
     currentTemperatures: serialHandler?.currentTemperatures || { spa: 0, pool: 0 },
-    poolName: poolConfig.poolName
+    poolName: poolConfig.poolName,
+    useTempControl: poolConfig.useTempControl
   });
 });
 
