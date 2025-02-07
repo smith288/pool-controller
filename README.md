@@ -62,6 +62,7 @@ Configuration Setup
 
 ![image](https://github.com/user-attachments/assets/a310ad1f-bd76-4e0d-a37a-fbfe78fd45da)
 
+[![Watch this video of the hardware setup](https://img.youtube.com/vi/gO161h5k5Hg/1.jpg)](https://youtube.com/shorts/gO161h5k5Hg)
 
 Special thanks to [@swilson](https://github.com/swilson) and [@mas985](https://github.com/mas985) for their fantastic research and code they've made available.
 
