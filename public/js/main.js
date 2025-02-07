@@ -12,8 +12,10 @@ document.addEventListener('DOMContentLoaded', () => {
   modal.className = 'modal';
   modal.innerHTML = `
     <div class="modal-content">
-      <p>Waiting for change...</p>
-      <div class="loader"></div>
+      <h3>Setting Temperature</h3>
+      <div class="progress-spinner"></div>
+      <p class="progress-message">Adjusting temperature...</p>
+      <button class="modal-button" style="display: none;">Close</button>
     </div>
   `;
   document.body.appendChild(modal);
@@ -398,26 +400,58 @@ document.addEventListener('DOMContentLoaded', () => {
   const setTempButtons = document.querySelectorAll('.set-temp-btn');
   
   tempSliders.forEach(slider => {
-    const display = slider.closest('.temp-control').querySelector('.current-temp');
-    
-    slider.addEventListener('input', (e) => {
-      display.textContent = e.target.value;
-    });
+    const display = slider.closest('.temp-control')?.querySelector('.current-temp');
+    if (display) {
+      slider.addEventListener('input', (e) => {
+        const value = parseInt(e.target.value, 10);
+        if (value <= 64) {
+          display.textContent = 'OFF';
+          if (display.nextSibling) display.nextSibling.textContent = '';
+        } else {
+          display.textContent = value;
+          if (display.nextSibling) display.nextSibling.textContent = '°F';
+        }
+      });
+    }
   });
   
   setTempButtons.forEach(button => {
     button.addEventListener('click', (e) => {
       const type = button.dataset.type;
       const slider = document.querySelector(`#${type}-temp-slider`);
-      const temperature = parseInt(slider.value, 10);
-      
-      // Emit temperature setting command
-      if (type === 'spa') {
-        socket.emit('setTemperature', { spatemp: temperature });
-      } else {
-        socket.emit('setTemperature', { pooltemp: temperature });
+      if (slider) {
+        const temperature = parseInt(slider.value, 10);
+        const displayTemp = temperature <= 64 ? 'OFF' : `${temperature}°F`;
+        
+        showProgressModal(`Setting ${type} temperature to ${displayTemp}...`);
+        
+        // Disable controls while processing
+        tempSliders.forEach(s => s.disabled = true);
+        setTempButtons.forEach(b => b.disabled = true);
+        
+        // Handle pool OFF state
+        if (type === 'pool' && temperature <= 64) {
+          socket.emit('setTemperature', { pooltemp: 0 }); // 0 indicates OFF
+        } else if (type === 'spa') {
+          socket.emit('setTemperature', { spatemp: temperature });
+        } else {
+          socket.emit('setTemperature', { pooltemp: temperature });
+        }
       }
     });
+  });
+
+  // Add temperature response handler
+  socket.on('temperatureResponse', (response) => {
+    // Re-enable controls
+    tempSliders.forEach(s => s.disabled = false);
+    setTempButtons.forEach(b => b.disabled = false);
+    
+    if (response.success) {
+      showSuccess(`Temperature set successfully to ${response.temperature === 0 ? 'OFF' : response.temperature + '°F'}`);
+    } else {
+      showError(`Failed to set temperature: ${response.error}`);
+    }
   });
 
   // Add temperature update handler
@@ -426,9 +460,83 @@ document.addEventListener('DOMContentLoaded', () => {
       const display = document.querySelector(`.${type}-temp .current-temp`);
       const slider = document.querySelector(`#${type}-temp-slider`);
       if (display && slider) {
-        display.textContent = temp;
-        slider.value = temp;
+        if (type === 'pool' && temp === 0) {
+          display.textContent = 'OFF';
+          display.nextSibling.textContent = ''; // Remove °F
+          slider.value = 64; // Set slider to OFF position
+        } else {
+          display.textContent = temp;
+          display.nextSibling.textContent = '°F';
+          slider.value = temp;
+        }
       }
     });
   });
+
+  function showProgressModal(message) {
+    const progressMessage = modal.querySelector('.progress-message');
+    const spinner = modal.querySelector('.progress-spinner');
+    const button = modal.querySelector('.modal-button');
+    const successIcon = modal.querySelector('.success-icon');
+    const errorIcon = modal.querySelector('.error-icon');
+
+    // Reset modal state
+    spinner.style.display = 'block';
+    button.style.display = 'none';
+    if (successIcon) successIcon.remove();
+    if (errorIcon) errorIcon.remove();
+    
+    progressMessage.textContent = message;
+    modal.style.display = 'block';
+    setTimeout(() => modal.classList.add('show'), 10);
+  }
+
+  function hideProgressModal() {
+    modal.classList.remove('show');
+    setTimeout(() => {
+      modal.style.display = 'none';
+    }, 300);
+  }
+
+  function showSuccess(message) {
+    const spinner = modal.querySelector('.progress-spinner');
+    const button = modal.querySelector('.modal-button');
+    const progressMessage = modal.querySelector('.progress-message');
+    
+    spinner.style.display = 'none';
+    
+    // Add success icon
+    const successIcon = document.createElement('div');
+    successIcon.className = 'success-icon';
+    successIcon.innerHTML = '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>';
+    spinner.parentNode.insertBefore(successIcon, spinner);
+    
+    progressMessage.textContent = message;
+    button.textContent = 'Close';
+    button.classList.remove('error');
+    button.style.display = 'inline-block';
+    
+    button.onclick = () => hideProgressModal();
+  }
+
+  function showError(message) {
+    const spinner = modal.querySelector('.progress-spinner');
+    const button = modal.querySelector('.modal-button');
+    const progressMessage = modal.querySelector('.progress-message');
+    
+    spinner.style.display = 'none';
+    
+    // Add error icon
+    const errorIcon = document.createElement('div');
+    errorIcon.className = 'error-icon';
+    errorIcon.innerHTML = '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>';
+    spinner.parentNode.insertBefore(errorIcon, spinner);
+    
+    progressMessage.textContent = message;
+    button.textContent = 'Try Again';
+    button.classList.add('error');
+    button.style.display = 'inline-block';
+    
+    button.onclick = () => hideProgressModal();
+  }
 });
