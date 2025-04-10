@@ -11,7 +11,14 @@ exports.toggleSwitch = (serialHandler) => (req, res) => {
     return res.status(400).json({ success: false, message: `Invalid switch type: ${type}` });
   }
 
-  const newState = value.toLowerCase() === 'true';
+  let newState = false;
+  if (value === undefined) {
+    const currentState = serialHandler.currentStatuses[type];
+    console.log(`Toggling ${type} from ${currentState} to ${!currentState}`);
+    newState = !currentState;
+  } else {
+    newState = value.toLowerCase() === 'true';
+  }
 
   serialHandler.sendCommand(type, newState, true);
   res.json({ success: true, type, newState });

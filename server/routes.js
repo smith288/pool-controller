@@ -19,7 +19,7 @@ function createRouter(serialHandler) {
   // API routes
   router.get('/api/status', apiController.getStatus(serialHandler));
   
-  router.post('/api/switch/:type/:value', apiController.toggleSwitch(serialHandler));
+  router.get('/api/switch/:type/:value?', apiController.toggleSwitch(serialHandler));
 
   // Add more routes as needed
 
