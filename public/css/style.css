@@ -1350,7 +1350,7 @@ body {
 }
 
 .temp-slider::-webkit-slider-thumb:hover {
-  background: var(--primary-color-dark);
+  background: var(--primary-color-light);
 }
 
 .temp-slider::-moz-range-thumb {
@@ -1364,7 +1364,7 @@ body {
 }
 
 .temp-slider::-moz-range-thumb:hover {
-  background: var(--primary-color-dark);
+  background: var(--primary-color-light);
 }
 
 .temp-value {
