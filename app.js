@@ -25,7 +25,7 @@ const serialHandler = new SerialHandler(
 
 // Create and start the sockets and web server
 const server = createServer(serialHandler);
-const PORT = process.env.POOL_CONTROLLER_PORT || 5000;
+const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
