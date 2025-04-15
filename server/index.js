@@ -18,15 +18,10 @@ function createServer(serialHandler) {
   app.set('view engine', 'ejs');
   app.set('views', path.join(__dirname, '../views'));
   
-  // Add base path to locals so it's available in all views
-  app.locals.basePath = '/' + poolConfig.basePath;
-
-  // Normalize base path for middleware
-  const normalizedBasePath = poolConfig.basePath ? '/' + poolConfig.basePath : '';
 
   // Serve static files under the base path
-  app.use(normalizedBasePath, express.static(path.join(__dirname, '../public')));
-  app.use(`${normalizedBasePath}/fonts`, express.static(path.join(__dirname, '../public/fonts')));
+  app.use('/', express.static(path.join(__dirname, '../public')));
+  app.use('/fonts', express.static(path.join(__dirname, '../public/fonts')));
   
   // Then add other middleware
   app.use(express.json());
@@ -57,17 +52,17 @@ function createServer(serialHandler) {
     } else {
       console.log("Config: ", JSON.stringify(poolConfig, null, 2));
       // Construct login path using normalized base path
-      const loginPath = `${normalizedBasePath}/login`;
+      const loginPath = `/login`;
       console.log(`Redirecting to ${loginPath}`);
       res.redirect(loginPath);
     }
   });
 
   // Mount all routes under the base path
-  app.use(normalizedBasePath, createRouter(serialHandler));
+  app.use('/', createRouter(serialHandler));
 
   // Set up Socket.IO with the base path
-  io.path(`${normalizedBasePath}/socket.io`);
+  io.path(`/socket.io`);
   socketHandler(io, serialHandler);
   
   return server;

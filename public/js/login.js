@@ -27,11 +27,9 @@ document.addEventListener('DOMContentLoaded', () => {
   function validatePin() {
     const pin = Array.from(pinBoxes).map(box => box.value).join('');
     
-    // Get the base path from the current URL and ensure no trailing slash
-    const basePath = window.location.pathname.split('/login')[0].replace(/\/$/, '');
     
     // Construct the login endpoint path
-    const loginPath = `${basePath}/login`;
+    const loginPath = `/login`;
     
     fetch(loginPath, {
       method: 'POST',
@@ -43,8 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        // Redirect to base path, ensuring no double slashes
-        window.location.href = basePath || '/';
+          // Redirect to base path, ensuring no double slashes
+        window.location.href = '/';
       } else {
         document.querySelector('.error-message').textContent = 'Invalid PIN';
         // Clear and focus first box
