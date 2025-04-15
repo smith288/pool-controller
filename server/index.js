@@ -50,8 +50,8 @@ function createServer(serialHandler) {
       next();
     } else {
       console.log("Config: ", JSON.stringify(poolConfig, null, 2));
-      // Ensure the redirect path starts with a forward slash
-      const loginPath = `${poolConfig.basePath ? '/' + poolConfig.basePath : ''}/login`;
+      // Construct login path without double slashes
+      const loginPath = poolConfig.basePath ? `/${poolConfig.basePath}/login` : '/login';
       console.log(`Redirecting to ${loginPath}`);
       res.redirect(loginPath);
     }
