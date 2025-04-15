@@ -40,6 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     .then(response => response.json())
     .then(data => {
       if (data.success) {
+        // Ensure we redirect to the correct path with the base path
         window.location.href = basePath || '/';
       } else {
         document.querySelector('.error-message').textContent = 'Invalid PIN';

@@ -50,8 +50,10 @@ function createServer(serialHandler) {
       next();
     } else {
       console.log("Config: ", JSON.stringify(poolConfig, null, 2));
-      console.log(`Redirecting to ${poolConfig.basePath}/login`);
-      res.redirect(`${poolConfig.basePath}/login`);
+      // Ensure the redirect path starts with a forward slash
+      const loginPath = `${poolConfig.basePath ? '/' + poolConfig.basePath : ''}/login`;
+      console.log(`Redirecting to ${loginPath}`);
+      res.redirect(loginPath);
     }
   });
 
