@@ -48,7 +48,9 @@ function createServer(serialHandler) {
     if ((req.session && req.session.authenticated) || !poolConfig.usePin) {
       next();
     } else {
-      res.redirect('/login');
+      console.log("Config: ", JSON.stringify(poolConfig, null, 2));
+      console.log(`Redirecting to ${poolConfig.basePath}/login`);
+      res.redirect(`${poolConfig.basePath}/login`);
     }
   });
 
