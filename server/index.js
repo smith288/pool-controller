@@ -42,7 +42,7 @@ function createServer(serialHandler) {
         req.path.startsWith('/js/') || 
         req.path.startsWith('/fonts/') ||
         req.path.startsWith('/socket.io/') ||
-        req.path.startsWith('/login')) {
+        req.path.indexOf('/login') > -1) {
       return next();
     }
 
