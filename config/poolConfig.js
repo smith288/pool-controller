@@ -4,5 +4,5 @@ module.exports = {
     pinNumber: '0000',
     usePin: true,
     useTempControl: true,
-    basePath: process.env.NODE_ENV === 'production' ? '/pool' : ''
+    basePath: process.env.NODE_ENV === 'production' ? 'pool' : ''
 };

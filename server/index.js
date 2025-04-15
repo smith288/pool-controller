@@ -38,11 +38,11 @@ function createServer(serialHandler) {
   app.use((req, res, next) => {
     console.log("Request path: ", req.path);
     // Skip auth check for static files and login
-    if (req.path.startsWith(`${poolConfig.basePath}/css/`) || 
-        req.path.startsWith(`${poolConfig.basePath}/js/`) || 
-        req.path.startsWith(`${poolConfig.basePath}/fonts/`) ||
-        req.path.startsWith(`${poolConfig.basePath}/socket.io/`) ||
-        req.path.startsWith(`${poolConfig.basePath}/login`)) {
+    if (req.path.startsWith('/css/') || 
+        req.path.startsWith('/js/') || 
+        req.path.startsWith('/fonts/') ||
+        req.path.startsWith('/socket.io/') ||
+        req.path.include('/login')) {
       return next();
     }
 
