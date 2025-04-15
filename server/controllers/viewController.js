@@ -3,7 +3,7 @@ const router = express.Router();
 const poolConfig = require('../../config/poolConfig');
 
 // Add login route
-router.get('login', (req, res) => {
+router.get('/login', (req, res) => {
   if (req.session && req.session.authenticated) {
     res.redirect(`${poolConfig.basePath}/`);
   } else {
@@ -11,7 +11,7 @@ router.get('login', (req, res) => {
   }
 });
 
-router.post('login', (req, res) => {
+router.post('/login', (req, res) => {
   const { pin } = req.body;
   if (pin === poolConfig.pinNumber) {
     req.session.authenticated = true;
