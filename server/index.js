@@ -36,6 +36,7 @@ function createServer(serialHandler) {
 
   // Add authentication check after static files
   app.use((req, res, next) => {
+    console.log("Request path: ", req.path);
     // Skip auth check for static files and login
     if (req.path.startsWith(`${poolConfig.basePath}/css/`) || 
         req.path.startsWith(`${poolConfig.basePath}/js/`) || 
