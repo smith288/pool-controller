@@ -51,7 +51,7 @@ function createServer(serialHandler) {
     } else {
       console.log("Config: ", JSON.stringify(poolConfig, null, 2));
       console.log(`Redirecting to ${poolConfig.basePath}/login`);
-      res.redirect(`login`);
+      res.redirect(`${poolConfig.basePath}/login`);
     }
   });
 
